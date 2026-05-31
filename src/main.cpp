@@ -7,6 +7,22 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <netdb.h>
+#include <thread>
+
+void handle_response(int client_fd)
+{
+   const char *response =  "+PONG\r\n";
+   for(;;)
+   {
+    char buffer[1024] = {0};
+    int byte_rec = recv(client_fd, buffer, sizeof(buffer), 0);
+    if(byte_rec <= 0)
+      break;
+    
+    send(client_fd, response, strlen(response), 0);
+   }
+   close(client_fd);
+}
 
 int main(int argc, char **argv) {
   // Flush after every std::cout / std::cerr
@@ -43,30 +59,24 @@ int main(int argc, char **argv) {
     return 1;
   }
   
-  struct sockaddr_in client_addr;
-  int client_addr_len = sizeof(client_addr);
-  std::cout << "Waiting for a client to connect...\n";
 
-  // You can use print statements as follows for debugging, they'll be visible when running tests.
-  std::cout << "Logs from your program will appear here!\n";
-
-  // Uncomment the code below to pass the first stage
-  
-   int client_fd = accept(server_fd, (struct sockaddr *) &client_addr, (socklen_t *) &client_addr_len);
-   std::cout << "Client connected\n";
+  while(true)
+  {
+    struct sockaddr_in client_addr;
+    int client_addr_len = sizeof(client_addr);
+    std::cout << "Waiting for a client to connect...\n";
+    int client_fd = accept(server_fd, (struct sockaddr *) &client_addr, (socklen_t *) &client_addr_len);
+    if(client_fd < 0)
+    {
+      std::cout<<"accept failed"<<std::endl;
+      continue;
+    }
+    std::cout << "Client connected\n";
+    std::thread worker(handle_response, client_fd);
+    worker.detach();
+  } 
    
-   char buffer[1024];
-   for(;;)
-   {
-    int byte_rec = recv(client_fd, buffer, sizeof(buffer), 0);
-    if(byte_rec <= 0)
-      break;
-
-    const char *response =  "+PONG\r\n";
-    send(client_fd, response, strlen(response), 0);
-   }
-   
-   close(server_fd);
+  close(server_fd);
 
   return 0;
 }
