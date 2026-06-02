@@ -15,7 +15,7 @@ std::vector<char*> parserRESP(char *buffer)
   const char* delim = "\r\n";
   std::vector<char*> respArr;
   // no of cmds
-  char* token = std::strtok(text, delim);
+  char* token = std::strtok(buffer, delim);
   if(token[1]=='0')
     return respArr;
 
@@ -62,8 +62,8 @@ void handle_response(int client_fd)
     
     std::vector<char*> respArr = parserRESP(buffer);
     std::string resp;
-    if(resp.size() == 0)
-      resp = buildBulkString(resp);
+    if(respArr.size() == 0)
+      resp = buildBulkString(respArr);
 
     const char *response =  resp.c_str();
     send(client_fd, response, strlen(response), 0);
