@@ -59,12 +59,12 @@ void handle_response(int client_fd)
     int byte_rec = recv(client_fd, buffer, sizeof(buffer), 0);
     if(byte_rec <= 0)
       break;
-    
+    std::cout<<buffer;
     std::vector<char*> respArr = parserRESP(buffer);
     std::string resp;
     if(respArr.size() == 0)
       resp = buildBulkString(respArr);
-
+    std::cout<<resp;
     const char *response =  resp.c_str();
     send(client_fd, response, strlen(response), 0);
    }
