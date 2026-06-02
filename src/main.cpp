@@ -10,7 +10,7 @@
 #include <thread>
 #include <vector>
 
-vector<char*> parserRESP(char *buffer)
+std::vector<char*> parserRESP(char *buffer)
 {
   const char* delim = "\r\n";
   std::vector<char*> respArr;
@@ -29,7 +29,7 @@ vector<char*> parserRESP(char *buffer)
   return respArr;
 }
 
-string buildBulkString(vector<char*> respArr)
+std::string buildBulkString(std::vector<char*> respArr)
 {
   std::string bulk_string = "";
   std::string cmd = respArr[0];
@@ -60,10 +60,10 @@ void handle_response(int client_fd)
     if(byte_rec <= 0)
       break;
     
-    vector<char*> respArr = parserRESP(buffer);
+    std::vector<char*> respArr = parserRESP(buffer);
     std::string resp;
-    if(respArr.size() == 0)
-      resp = buildBulkString(respArr);
+    if(resp.size() == 0)
+      resp = buildBulkString(resp);
 
     const char *response =  resp.c_str();
     send(client_fd, response, strlen(response), 0);
