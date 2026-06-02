@@ -23,7 +23,6 @@ std::vector<char*> parserRESP(char *buffer)
   {
     token = std::strtok(nullptr, delim);
     token = std::strtok(nullptr, delim);
-    std::cout<<token<<std::endl;
     if(token != nullptr)
       respArr.push_back(token);
   }
@@ -38,9 +37,10 @@ std::string buildBulkString(std::vector<char*> respArr)
   std::transform(cmd.begin(), cmd.end(), cmd.begin(), [](unsigned char c) {
         return std::tolower(c);
     });
-
+  std::cout<<cmd<<std::endl;
   if(cmd == "echo")
   {
+    std::cout<<cmd<<std::endl;
     for(int i=1;i<respArr.size();i++)
       bulk_string += "$" + std::to_string(strlen(respArr[i])) + "\r\n"+std::string(respArr[i]) + "\r\n";
   }
