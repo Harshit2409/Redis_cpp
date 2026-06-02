@@ -8,10 +8,51 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <thread>
+#include <vector>
+
+vector<char*> parserRESP(char *buffer)
+{
+  const char* delim = "\r\n";
+  std::vector<char*> respArr;
+  // no of cmds
+  char* token = std::strtok(text, delim);
+  if(token[1]=='0')
+    return respArr;
+
+  while( token != NULL ) 
+  {
+    token = std::strtok(nullptr, delim);
+    token = std::strtok(nullptr, delim);
+    if(token != nullptr)
+      respArr.push_back(token);
+  }
+  return respArr;
+}
+
+string buildBulkString(vector<char*> respArr)
+{
+  std::string bulk_string = "";
+  std::string cmd = respArr[0];
+  //converting to lower case for handling case sensitive cmds.
+  std::transform(cmd.begin(), cmd.end(), cmd.begin(), [](unsigned char c) {
+        return std::tolower(c);
+    });
+
+  if(cmd == "echo")
+  {
+    for(int i=1;i<respArr.size();i++)
+      bulk_string += "$" + std::to_string(strlen(respArr[i])) + "\r\n"+std::string(respArr[i]) + "\r\n";
+  }
+  else if(cmd == "ping")
+  {
+    bulk_string += "+PONG\r\n";
+  }
+
+  return bulk_string;
+}
 
 void handle_response(int client_fd)
 {
-   const char *response =  "+PONG\r\n";
    for(;;)
    {
     char buffer[1024] = {0};
@@ -19,6 +60,12 @@ void handle_response(int client_fd)
     if(byte_rec <= 0)
       break;
     
+    vector<char*> respArr = parserRESP(buffer);
+    std::string resp;
+    if(respArr.size() == 0)
+      resp = buildBulkString(respArr);
+
+    const char *response =  resp.c_str();
     send(client_fd, response, strlen(response), 0);
    }
    close(client_fd);
