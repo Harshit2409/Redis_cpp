@@ -37,7 +37,7 @@ std::string buildBulkString(std::vector<char*> respArr)
   std::transform(cmd.begin(), cmd.end(), cmd.begin(), [](unsigned char c) {
         return std::tolower(c);
     });
-  std::cout<<cmd<<std::endl;
+  
   if(cmd == "echo")
   {
     std::cout<<cmd<<std::endl;
@@ -63,7 +63,7 @@ void handle_response(int client_fd)
 
     std::vector<char*> respArr = parserRESP(buffer);
     std::string resp;
-    if(respArr.size() == 0)
+    if(respArr.size() != 0)
       resp = buildBulkString(respArr);
 
     const char *response =  resp.c_str();
